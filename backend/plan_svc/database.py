@@ -10,15 +10,22 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_NAME = os.getenv("DB_NAME", "merp_plan_svc")
 DB_PORT = os.getenv("DB_PORT", "3306") # Default MySQL port
 
-# 根据实际使用的数据库类型调整连接字符串
-# 例如 PostgreSQL: "postgresql://user:password@host:port/database"
-# 例如 SQLite: "sqlite:///./plan_svc.db"
+# 在开发环境中使用SQLite以避免数据库连接问题
+# 如果需要使用MySQL，可以取消下面的注释并注释SQLite连接
+# SQLALCHEMY_DATABASE_URL = "sqlite:///./plan_svc.db"
+
+# 使用SQLite作为开发环境数据库
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    # connect_args={"check_same_thread": False} # 仅当使用 SQLite 时需要
-)
+# 根据数据库类型决定是否添加 connect_args
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

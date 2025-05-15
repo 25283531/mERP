@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from models import models
-from ..schemas import schemas
+from ..models import models
+from .. import schemas
 
 def get_plan(db: Session, plan_id: int) -> Optional[models.Plan]:
     return db.query(models.Plan).filter(models.Plan.id == plan_id).first()

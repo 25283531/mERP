@@ -1,5 +1,26 @@
+import os
+import sys
+from pathlib import Path
 from fastapi import FastAPI
-from . import routes
+from dotenv import load_dotenv
 
-app = FastAPI()
-app.include_router(routes.router)
+# 设置项目根目录到PYTHONPATH
+root_dir = str(Path(__file__).parent.parent.parent)
+sys.path.append(root_dir)
+
+# 使用绝对导入
+from backend.shift_svc.routes import router
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'), override=True)
+
+app = FastAPI(title="Shift Service", description="班次服务", version="0.1.0")
+
+app.include_router(router)
+
+@app.get("/", tags=["Root"], summary="Root endpoint for service health check")
+def read_root():
+    return {"message": f"Hello from {app.title}!"}
+
+@app.get("/health", tags=["Health"], summary="Health check endpoint")
+def health_check():
+    return {"status": "ok", "service": app.title}
